@@ -1,10 +1,12 @@
 const express = require('express');
 const exphbrs = require('express-handlebars');
+const multer = require('multer');
+const upload = multer({ dest: 'public/uploads/' });
 const app = express();
 const port = 3000;
 const mongoose = require('mongoose');
-mongoose.connect('mongodb://localhost:27017/upload_test',
-    { useUnifiedTopology: true, useNewUrlParser: true })
+mongoose.connect('mongodb://localhost:27017/upload_test'),
+ 
 
 
 app.set('view engine', 'handlebars');
@@ -15,31 +17,37 @@ app.use(express.static('public'))
 
 app.get('/', (req, res) => {
     console.log(req);
-    res.render('home',{
-       title: 'Welcome to express upload'
+    res.render('home', {
+        title: 'New user'
+    });
+
+})
+
+app.post('/upload', upload.single('image'), (req, res, next) => {
+    console.log(req.file);
+    res.send('l\'image est bien uploadée');
+
 });
 
-})
-
 const uploadSchema = new mongoose.Schema({
-        username: String,
-        firstname: String,
-        surname: String,
-        profilePicture: String
+    username: String,
+    firstname: String,
+    surname: String,
+    profilePicture: String
 })
 
-const user = mongoose.model('user',uploadSchema);
+const User = mongoose.model('User', uploadSchema);
 
-user.create({
-        username: 'The great writer',
-        firstname: 'Toni Morrison',
-        surname: 'Lady',
-        profilePicture:'/img/Toni Morrison.jpg'
+User.create({
+    username: 'The great writer',
+    firstname: 'Toni Morrison',
+    surname: 'Lady',
+    profilePicture: './uploads/Toni Morrison.jpg'
 
-}).then(data =>console.log(data))
-.catch(err =>console.log(err))
+}).then(data => console.log(data))
+    .catch(err => console.log(err))
 
 
 app.listen(port, () => {
-    console.log(`Server started on: ${port}`)
+    console.log(`Welcome to express upload: ${port}`)
 });
