@@ -15,6 +15,11 @@ app.engine('handlebars', exphbrs())
 
 app.use(express.static('public'))
 
+//app.get('/',(req,res) =>{
+   // res.send('Welcome to express upload')
+//})
+
+
 app.get('/', (req, res) => {
     console.log(req);
     res.render('home', {
@@ -24,19 +29,22 @@ app.get('/', (req, res) => {
 })
 
 app.post('/upload', upload.single('image'), (req, res, next) => {
-    console.log(req.file);
+    console.log('fichiers',req.file);
     res.send('l\'image est bien uploadée');
 
 });
 
-const uploadSchema = new mongoose.Schema({
-    username: String,
+const userSchema = new mongoose.Schema({
+    username: {
+        type:String,
+        index:true
+    },
     firstname: String,
     surname: String,
     profilePicture: String
 })
 
-const User = mongoose.model('User', uploadSchema);
+const User = mongoose.model('User', userSchema);
 
 User.create({
     username: 'The great writer',
@@ -49,5 +57,5 @@ User.create({
 
 
 app.listen(port, () => {
-    console.log(`Welcome to express upload: ${port}`)
+    console.log(`Server express is listening on port: ${port}`)
 });
