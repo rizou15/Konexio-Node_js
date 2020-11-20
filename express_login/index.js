@@ -5,7 +5,7 @@ const MongoStore = require('connect-mongo')(expressSession);
 const mongoose = require('mongoose');
 const passport = require('passport');
 const LocalStrategy = require('passport-local');
-const User = require('./models/user'); // autre syntaxe possible => const User = require("./models").User;
+const User = require('./models/user');  // autre syntaxe possible => const User = require("./models").User;
 const port = 3000;
 mongoose.connect('mongodb://localhost:27017/authentification_demo',
     { useNewUrlParser: true, useCreateIndex: true, useUnifiedTopology: true });
@@ -17,11 +17,10 @@ app.set('view engine', 'handlebars');
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
-app.use(expressSession({             // middleware de session qui manage les cookies pour toute requête entrante dans le serveur
+app.use(expressSession({          // middleware de session qui manage les cookies pour toute requête entrante dans le serveur
     secret: "keyboard cat",
     resave: false,
     saveUninitialized: true,
-    cookie: { secure: true },
     store: new MongoStore({ mongooseConnection: mongoose.connection })
 }))
 
@@ -34,43 +33,46 @@ passport.deserializeUser(User.deserializeUser()); // Reçoit l'id de l'utilisate
 
 
 app.get('/', (req, res) => {
+    //console.log('test1');
     res.render('home')
 })
 
-app.get("/login", (req, res) => {
-    res.render("login");
-
-});
+app.get('/login', (req, res) => {
+    //console.log('test2');
+    res.render('login')
+})
 
 app.get('/signup', (req, res) => {
+    //console.log('test3');
     res.render('signup')
 })
 
-app.get('/admin', passport.authenticate('local', { failureRedirect: '/login' }), (req, res) => {
-    res.render('admin')
+// app.get('/admin', passport.authenticate('local', { failureRedirect: '/login' }), (req, res) => { 
+app.get('/admin', (req, res) => {
+    if (req.isAuthenticated()) {
+        //console.log(req.user);
+        res.render("admin");
+    } else {
+        res.redirect("/")
+
+    }
 })
 
-
-app.get('/logout', (req, res) => {
-    res.render('logout')
-})
 
 app.post('/signup', (req, res) => {
+    console.log('test5');
     const { username, password } = req.body;
-
-
     User.register({ username }, password, (err, user) => {
         if (err) {
+            // console.log('test4', err);
             return res.render('signup');
         } else {
             passport.authenticate('local')(req, res, () => {
+                console.log('exemple')
                 res.redirect('/admin');
-
             })
         }
-
     })
-
 });
 
 app.post(
@@ -81,8 +83,14 @@ app.post(
     })
 );
 
+app.get('/logout', (req, res) => {
+    //console.log('test5');
+    req.logout();
+    res.redirect('/');
+});
 
 
 app.listen(port, () => {
     console.log(`Server started on port: ${port}`);
 });
+
