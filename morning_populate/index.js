@@ -1,34 +1,20 @@
 // à modifier car incomplet
 
 const express = require('express');
-const multer = require('multer');
-const upload = multer({ dest: 'public/uploads/' });
-const app = express();
-const port = 3000;
 const mongoose = require('mongoose');
 const Student = require('./models/student');
 const Address = require('./models/address');
 mongoose.connect('mongodb://localhost:27017/morning_populate',
-    { useUnifiedTopology: true, useNewUrlParser: true });
+    { useUnifiedTopology: true, useNewUrlParser: true,useCreateIndex: true });
 
+const app = express();
 
-app.get('/', (req, res) => {
-    console.log(req);
-    res.render('home', {
-        title: 'New student'
-    });
+app.use(express.json());
 
-})
-
-app.post('/upload', upload.single('image'), (req, res, next) => {
-    console.log('fichiers', req.file);
-    res.send('l\'image est bien uploadée');
-
-});
+const port = 3000;
 
 
 Student.create({
-    _id: '',
     firstname: '',
     surname: '',
     address: ''
@@ -38,7 +24,6 @@ Student.create({
     .catch(err => console.log(err))
 
 Address.create({
-    _id:'',
     streetName: '',
     streetNumber: '',
     postCode: '',
